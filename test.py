@@ -16,7 +16,6 @@ print(d.find(b'b'))
 print(d.find(b'c'))
 
 
-
 def m_test():
     """
     dict 1.19778108597
@@ -25,11 +24,12 @@ def m_test():
     cdef 2.38966298103
     """
     d = {}
+    N = 1000000
     print("prepare dict")
-    for i in range(1000000):
-        x = random.randint(0, 1000000 * 2)
-        y = 1000000 * 2 - x
-        d[bytes(str(x))] = bytes(str(y))
+    for i in range(N):
+        x = random.randint(0, N * 2)
+        y = N * 2 - x
+        d[str(x).encode('utf8')] = str(y).encode('utf8')
 
     print("gen static dict")
     staticdict.MakeHashDict(d, 'tmp')
@@ -38,16 +38,16 @@ def m_test():
 
     print("test dict")
     bt = time.time()
-    for i in range(1000000 * 2):
-        y = d.get(bytes(str(i)), None)
+    for i in range(N * 2 + 1):
+        y = d.get(str(i).encode('utf8'), None)
         if y is None : continue
     print(time.time() - bt)
     
     print("test static dict")
     n = 0
     bt = time.time()
-    for i in range(1000000 * 2):
-        y = sd.find(bytes(str(i)))
+    for i in range(N * 2 + 1):
+        y = sd.find(str(i).encode('utf8'))
         if y is None : continue
         n += 1
     print(time.time() - bt)
