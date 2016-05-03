@@ -11,7 +11,7 @@ cdef unsigned long strhash(char* s):
 
 
 def calc_bytes(s):
-    return chr(len(s)) + s
+    return chr(len(s)) + str(s)
     pass
 
 class HashDict():
@@ -19,7 +19,7 @@ class HashDict():
         self._index = array.array('L')
         self._index.fromfile(
                 open(filename + '.index', 'rb'),
-                os.stat(filename + '.index').st_size / 8
+                os.stat(filename + '.index').st_size // 8
                 )
 
         self._data = open(filename + '.data', 'rb').read()
@@ -71,7 +71,9 @@ def MakeHashDict(d, filename):
     '''calc str for each bucket'''
     for key, value in d.items():
         idx = strhash(key) % bucket_size
-        bucket_vec[idx] += calc_bytes(key) + calc_bytes(value)
+        bucket_vec[idx] += (
+                bytes(calc_bytes(key)) 
+                + bytes(calc_bytes(value)))
 
     '''write the index file'''
     datafile = open(filename + '.data', 'wb')

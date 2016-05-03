@@ -5,15 +5,15 @@ random.seed(123)
 
 
 d = {}
-d['a'] = 'b'
-d['c'] = 'd'
+d[b'a'] = b'b'
+d[b'c'] = b'd'
 staticdict.MakeHashDict(d, 'tmp')
 
 
 d = staticdict.HashDict('tmp')
-print(d.find('a'))
-print(d.find('b'))
-print(d.find('c'))
+print(d.find(b'a'))
+print(d.find(b'b'))
+print(d.find(b'c'))
 
 
 

@@ -12,18 +12,19 @@ def calc_n_bytes(s):
         return len(s) + 1
     return len(s) + 2  # TODO
 def calc_bytes(s):
-    return chr(len(s)) + s
-    pass
+    return bytes(chr(len(s)) + s)
 
 class HashDict():
     def __init__(self, filename):
         self._index = array.array('L')
+        #print(os.stat(filename + '.index').st_size)
         self._index.fromfile(
                 open(filename + '.index', 'rb'),
-                os.stat(filename + '.index').st_size / 8
+                os.stat(filename + '.index').st_size // 8
                 )
+        print(len(self._index))
 
-        self._data = open(filename + '.data', 'rb').read()
+        self._data = bytes(open(filename + '.data', 'rb').read())
 
     def find(self, key):
         idx = strhash(key) % len(self._index)
@@ -74,5 +75,7 @@ def MakeHashDict(d, filename):
             index_bytes[i] = offset
             offset += len(v) + 1
 
-    array.array('L', index_bytes).tofile(open(filename + '.index', 'wb'))
+    index_file = open(filename + '.index', 'wb')
+    array.array('L', index_bytes).tofile(index_file)
     datafile.close()
+    index_file.close()
