@@ -7,10 +7,11 @@ random.seed(123)
 d = {}
 d[b'a'] = b'b'
 d[b'c'] = b'd'
-d = staticdict.HashDict(d)
-print(d.find(b'a'))
-print(d.find(b'b'))
-print(d.find(b'c'))
+d = staticdict.StaticHashDict(d)
+print(d[b'a'])
+print(d[b'b'])
+print(d[b'c'])
+
 
 
 def m_test():
@@ -29,9 +30,9 @@ def m_test():
         d[str(x).encode('utf8')] = str(y).encode('utf8')
 
     print("gen static dict")
-    sd = staticdict.HashDict(d)
+    sd = staticdict.StaticHashDict(d)
     sd.save('tmp')
-    sd = staticdict.HashDict('tmp')
+    sd = staticdict.StaticHashDict('tmp')
 
     print("test dict")
     bt = time.time()
@@ -44,7 +45,7 @@ def m_test():
     n = 0
     bt = time.time()
     for i in range(N * 2 + 1):
-        y = sd.find(str(i).encode('utf8'))
+        y = sd[str(i).encode('utf8')]
         if y is None : continue
         n += 1
     print(time.time() - bt)

@@ -14,7 +14,7 @@ def calc_bytes(s):
     ret = chr(len(s)).encode('utf8') + s
     return ret
 
-class HashDict():
+class StaticHashDict():
     def save(self, filename):
         self._index.tofile(open(filename + '.index', 'wb'))
         datafile = open(filename + '.data', 'wb')
@@ -73,7 +73,7 @@ class HashDict():
         if type(filename) == dict :
             self.fromdict(filename)
 
-    def find(self, key):
+    def __getitem__(self, key):
         cdef size_t idx = strhash(key) % len(self._index)
         cdef size_t cand_l = 0
         cdef size_t value_l = 0
@@ -104,3 +104,5 @@ class HashDict():
 
             idx = idx + 1 + value_l
 
+    def find(self, key):
+        return self[key]
