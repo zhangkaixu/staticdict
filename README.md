@@ -1,19 +1,19 @@
 # staticdict
-static dict for fast load and search
+静态的词典
+
+便于快速保存和读取
 
 
-## static hash table
+## StaticHashDict
 
-    # build the dict
-    from staticdict import StaticHashDict
-    d = {b'by\0tes' : b'bytes'}
-    sd = StaticHashDict(d)
+    from staticdict import *
 
-    # use it
+    # 用key和value都是bytes的dict建词典
+    sd = StaticHashDict({b'by\0tes' : b'bytes'})
+
+    # 使用
     print(sd[b'by\0tes'])
 
-    # save
+    # 即使key非常多 保存 读取 都非常快
     d.save('tmp')
-
-    # load
     sd = StaticHashDict('tmp')

@@ -56,7 +56,7 @@ class StaticHashDict():
 
         #array.array('L', index_bytes).tofile(open(filename + '.index', 'wb'))
         self._index = array.array('L', index_bytes)
-        self._data = ''.join(_data)
+        self._data = b''.join(_data)
 
     def load(self, filename):
         self._index = array.array('L')
@@ -72,6 +72,9 @@ class StaticHashDict():
             self.load(filename)
         if type(filename) == dict :
             self.fromdict(filename)
+
+    def __contains__(self, key):
+        return self[key] is not None
 
     def __getitem__(self, key):
         cdef size_t idx = strhash(key) % len(self._index)
