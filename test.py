@@ -7,10 +7,7 @@ random.seed(123)
 d = {}
 d[b'a'] = b'b'
 d[b'c'] = b'd'
-staticdict.MakeHashDict(d, 'tmp')
-
-
-d = staticdict.HashDict('tmp')
+d = staticdict.HashDict(d)
 print(d.find(b'a'))
 print(d.find(b'b'))
 print(d.find(b'c'))
@@ -32,8 +29,8 @@ def m_test():
         d[str(x).encode('utf8')] = str(y).encode('utf8')
 
     print("gen static dict")
-    staticdict.MakeHashDict(d, 'tmp')
-
+    sd = staticdict.HashDict(d)
+    sd.save('tmp')
     sd = staticdict.HashDict('tmp')
 
     print("test dict")

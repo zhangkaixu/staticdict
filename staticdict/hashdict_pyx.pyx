@@ -15,7 +15,50 @@ def calc_bytes(s):
     return ret
 
 class HashDict():
-    def __init__(self, filename):
+    def save(self, filename):
+        self._index.tofile(open(filename + '.index', 'wb'))
+        datafile = open(filename + '.data', 'wb')
+        datafile.write(self._data)
+        datafile.close()
+
+
+    def fromdict(self, d):
+        '''determine the bucket size'''
+        bucket_size = 1
+        while bucket_size * 2 < len(d) :
+            bucket_size *= 2
+
+        bucket_vec = [bytes() for i in range(bucket_size)]
+
+
+        '''calc str for each bucket'''
+        for key, value in d.items():
+            idx = strhash(key) % bucket_size
+            bucket_vec[idx] += (
+                    (calc_bytes(key))
+                    + (calc_bytes(value)))
+
+        '''write the index file'''
+        _data = [b'\0']
+        offset = 1
+
+        index_bytes = [0 for i in range(bucket_size)]
+
+        for i, v in enumerate(bucket_vec):
+            if len(v) == 0 :
+                index_bytes[i] = 0
+            else :
+                _data.append(v)
+                _data.append(b'\0')
+
+                index_bytes[i] = offset
+                offset += len(v) + 1
+
+        #array.array('L', index_bytes).tofile(open(filename + '.index', 'wb'))
+        self._index = array.array('L', index_bytes)
+        self._data = ''.join(_data)
+
+    def load(self, filename):
         self._index = array.array('L')
         self._index.fromfile(
                 open(filename + '.index', 'rb'),
@@ -23,7 +66,12 @@ class HashDict():
                 )
 
         self._data = open(filename + '.data', 'rb').read()
-        #self._char_data = self._data
+
+    def __init__(self, filename):
+        if type(filename) == str :
+            self.load(filename)
+        if type(filename) == dict :
+            self.fromdict(filename)
 
     def find(self, key):
         cdef size_t idx = strhash(key) % len(self._index)
@@ -56,40 +104,3 @@ class HashDict():
 
             idx = idx + 1 + value_l
 
-
-
-
-def MakeHashDict(d, filename):
-    '''determine the bucket size'''
-    bucket_size = 1
-    while bucket_size * 2 < len(d) :
-        bucket_size *= 2
-
-    bucket_vec = [bytes() for i in range(bucket_size)]
-
-
-    '''calc str for each bucket'''
-    for key, value in d.items():
-        idx = strhash(key) % bucket_size
-        bucket_vec[idx] += (
-                (calc_bytes(key))
-                + (calc_bytes(value)))
-
-    '''write the index file'''
-    datafile = open(filename + '.data', 'wb')
-    datafile.write(b'\0')
-    offset = 1
-
-    index_bytes = [0 for i in range(bucket_size)]
-
-    for i, v in enumerate(bucket_vec):
-        if len(v) == 0 :
-            index_bytes[i] = 0
-        else :
-            datafile.write(v)
-            datafile.write(b'\0')
-            index_bytes[i] = offset
-            offset += len(v) + 1
-
-    array.array('L', index_bytes).tofile(open(filename + '.index', 'wb'))
-    datafile.close()
