@@ -7,10 +7,16 @@ random.seed(123)
 d = {}
 d[b'a'] = b'b'
 d[b'c'] = b'd'
+d[b'1' * 200] = b'd' * 200
 d = staticdict.StaticHashDict(d)
+print('get a')
 print(d[b'a'])
+print('get b')
 print(d[b'b'])
+print('get c')
 print(d[b'c'])
+print('get 1111*')
+print(len(d[b'1' * 200]))
 
 
 

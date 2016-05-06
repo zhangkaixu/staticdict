@@ -1,6 +1,7 @@
 import array
 import os
 from libc.string cimport strncmp
+from cython.operator cimport dereference as deref
 
 cdef unsigned long strhash(char* s):
     cdef unsigned long h = 0
@@ -11,8 +12,40 @@ cdef unsigned long strhash(char* s):
 
 
 def calc_bytes(s):
-    ret = chr(len(s)).encode('utf8') + s
-    return ret
+    cdef size_t l = len(s)
+
+    b = []
+    while l > 0 :
+        b.append(l % 128)
+        l = l // 128
+    #print(b)
+    for l in range(len(b) - 1):
+        b[l] += 128
+    #print('coded b', b)
+    #b = reversed(b)
+    b = array.array('B', b).tostring()
+    #b = b''.join([chr(i).encode('ascii') for i in b])
+    #print(s, b)
+
+    return b + s
+
+cdef size_t get_size(unsigned char* p, size_t* size):
+    cdef unsigned char cur = 0
+    size[0] = 0
+    cdef size_t i = 0
+
+    while True :
+        cur = p[0]
+        #print('cur', cur, (cur & 0x7f) << (i * 7))
+        #size[0] = (size[0] << 7) | (cur & 0x8f)
+        size[0] = size[0] | ((cur & 0x7f) << (i * 7))
+        i = i + 1
+        if cur < 128 :
+            #print('return', i, size[0])
+            return i
+        p = p + 1
+
+
 
 class StaticHashDict():
     def save(self, filename):
@@ -54,7 +87,6 @@ class StaticHashDict():
                 index_bytes[i] = offset
                 offset += len(v) + 1
 
-        #array.array('L', index_bytes).tofile(open(filename + '.index', 'wb'))
         self._index = array.array('L', index_bytes)
         self._data = b''.join(_data)
 
@@ -86,26 +118,29 @@ class StaticHashDict():
         cdef unsigned char* _data_ptr = self._data
         cdef char* _data_ptr2 = self._data
         cdef char* cand_ptr
+        cdef size_t l_size = 0
 
         idx = self._index[idx]
 
         while True:
-            cand_l = _data_ptr[idx]
+            l_size = get_size(_data_ptr + idx, (&cand_l))
+
             if cand_l == 0 : return None
 
-            cand_ptr = _data_ptr2 + idx + 1
+            cand_ptr = _data_ptr2 + idx + l_size
+
+            idx = idx + l_size + cand_l
 
 
-            idx = idx + 1 + cand_l
-            value_l = _data_ptr[idx]
+            l_size = get_size(_data_ptr + idx, (&value_l))
 
             if (key_size == cand_l and 
                     strncmp(key_ptr, cand_ptr, cand_l) == 0
                     ) :
-                value = self._data[idx + 1 : idx + 1 + value_l]
+                value = self._data[idx + l_size : idx + l_size + value_l]
                 return value
 
-            idx = idx + 1 + value_l
+            idx = idx + l_size + value_l
 
     def find(self, key):
         return self[key]
