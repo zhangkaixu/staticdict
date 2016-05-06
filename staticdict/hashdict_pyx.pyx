@@ -19,10 +19,12 @@ def calc_bytes(s):
         b.append(l % 128)
         l = l // 128
     #print(b)
+    b = list(reversed(b))
     for l in range(len(b) - 1):
         b[l] += 128
     #print('coded b', b)
     #b = reversed(b)
+    #b = array.array('B', reversed(b)).tostring()
     b = array.array('B', b).tostring()
     #b = b''.join([chr(i).encode('ascii') for i in b])
     #print(s, b)
@@ -36,12 +38,10 @@ cdef size_t get_size(unsigned char* p, size_t* size):
 
     while True :
         cur = p[0]
-        #print('cur', cur, (cur & 0x7f) << (i * 7))
-        #size[0] = (size[0] << 7) | (cur & 0x8f)
-        size[0] = size[0] | ((cur & 0x7f) << (i * 7))
+        size[0] = (size[0] << 7) | (cur & 0x7f)
+        #size[0] = size[0] | ((cur & 0x7f) << (i * 7))
         i = i + 1
         if cur < 128 :
-            #print('return', i, size[0])
             return i
         p = p + 1
 
