@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 setup(
         name = 'staticdict',
 
-        version = '0.0.1',
+        version = '0.0.2',
 
         author = 'ZHANG Kaixu',
         author_email = 'zhangkaixu@hotmail.com',
